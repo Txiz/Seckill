@@ -1,1 +1,30 @@
+# 端口号
+server:
+  port: 8000
 
+spring:
+  application:
+    name: Seckill
+  profiles:
+    active: dev
+  # MySQL数据源
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://121.196.198.1/txiz-seckill?serverTimezone=GMT%2B8
+    username:
+    password:
+  # 格式化时间
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  # Redis
+  redis:
+    host:
+    port: 6379
+    database: 0
+
+# mybatis-plus日志
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath:/xml/*.xml
