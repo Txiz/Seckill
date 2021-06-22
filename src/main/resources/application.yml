@@ -10,7 +10,7 @@ spring:
   # MySQL数据源
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://121.196.198.1/txiz-seckill?serverTimezone=GMT%2B8
+    url: jdbc:mysql://localhost/txiz-seckill?serverTimezone=GMT%2B8
     username:
     password:
   # 格式化时间
