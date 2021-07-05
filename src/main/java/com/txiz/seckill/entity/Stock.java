@@ -3,6 +3,7 @@ package com.txiz.seckill.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.Version;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -40,5 +41,6 @@ public class Stock implements Serializable {
     private Integer sale;
 
     @ApiModelProperty(value = "版本号")
+    @Version
     private Integer version;
 }

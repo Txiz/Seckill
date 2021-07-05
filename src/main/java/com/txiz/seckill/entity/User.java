@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * <p>
@@ -21,25 +20,16 @@ import java.util.Date;
  */
 @Data
 @EqualsAndHashCode()
-@TableName("tb_order")
-@ApiModel(value = "Order对象", description = "订单表")
-public class Order implements Serializable {
+@TableName("tb_user")
+@ApiModel(value = "User对象", description = "用户表")
+public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value = "订单表主键ID")
-    @TableId(value = "oid", type = IdType.AUTO)
-    private Integer oid;
-
-    @ApiModelProperty(value = "库存ID")
-    private Integer sid;
-
-    @ApiModelProperty(value = "用户ID")
+    @ApiModelProperty(value = "用户表主键ID")
+    @TableId(value = "uid", type = IdType.AUTO)
     private Integer uid;
 
-    @ApiModelProperty(value = "库存名称")
-    private String name;
-
-    @ApiModelProperty(value = "创建时间")
-    private Date createTime;
+    @ApiModelProperty(value = "用户名称")
+    private String username;
 }
