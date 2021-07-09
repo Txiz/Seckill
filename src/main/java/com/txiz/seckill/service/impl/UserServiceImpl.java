@@ -47,7 +47,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String key = "limit_" + uid;
         // 使用key从Redis中获取缓存
         Integer value = (Integer) redisTemplate.opsForValue().get(key);
-        int limit = 0;
+        int limit = 1;
         // 如果key不存在，就写入key，值为0；反之，就值加1，重新存入key
         // 统计频率就统计1分钟内的
         long time = 1L;

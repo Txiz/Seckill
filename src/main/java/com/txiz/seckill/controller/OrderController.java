@@ -7,6 +7,8 @@ import com.txiz.seckill.service.StockService;
 import com.txiz.seckill.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -125,7 +127,6 @@ public class OrderController {
                     LOGGER.error("购买失败，超过频率限制！");
                     return "购买失败，超过频率限制！";
                 }
-
                 int remain = orderService.createOrderWithVerifyHash(sid, uid, verifyHash);
                 LOGGER.info("购买成功，剩余库存为: {}", remain);
                 return "购买成功，剩余库存为：" + remain;
@@ -133,6 +134,34 @@ public class OrderController {
         } catch (Exception e) {
             LOGGER.error("购买失败：{}", e.getMessage());
             return "购买失败：" + e.getMessage();
+        }
+    }
+
+    @Resource
+    private RedissonClient redissonClient;
+
+    @GetMapping("/createOrderWithVerifyHashAndLimitByRedisLock")
+    @ApiOperation(value = "Redisson分布式锁")
+    public String createOrderWithVerifyHashAndLimitByRedisLock(@RequestParam Integer sid, @RequestParam Integer uid, @RequestParam String verifyHash) {
+        String key = "create_order_lock";
+        RLock lock = redissonClient.getLock(key);
+        lock.lock();
+        try {
+            int count = userService.addUserCount(uid);
+            LOGGER.info("用户截至该次的访问次数为: {}", count);
+            boolean checkUserCount = userService.checkUserCount(uid);
+            if (checkUserCount) {
+                LOGGER.error("购买失败，超过频率限制！");
+                return "购买失败，超过频率限制！";
+            }
+            int remain = orderService.createOrderWithVerifyHash(sid, uid, verifyHash);
+            LOGGER.info("购买成功，剩余库存为: {}", remain);
+            return "购买成功，剩余库存为：" + remain;
+        } catch (Exception e) {
+            LOGGER.error("购买失败：{}", e.getMessage());
+            return "购买失败：" + e.getMessage();
+        } finally {
+            lock.unlock();
         }
     }
 }
