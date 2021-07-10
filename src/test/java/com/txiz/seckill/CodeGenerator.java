@@ -44,10 +44,10 @@ public class CodeGenerator {
 
         // 数据源配置
         DataSourceConfig dsc = new DataSourceConfig();
-        dsc.setUrl("jdbc:mysql://121.196.198.1:3306/txiz-seckill?useUnicode=true&useSSL=false&characterEncoding=utf8&serverTimezone=GMT%2B8");
+        dsc.setUrl("jdbc:mysql://localhost:3306/txiz-seckill?useUnicode=true&useSSL=false&characterEncoding=utf8&serverTimezone=GMT%2B8");
         dsc.setDriverName("com.mysql.cj.jdbc.Driver");
-        dsc.setUsername("xiongzhaoxi");
-        dsc.setPassword("xzx123");
+        dsc.setUsername(" ");
+        dsc.setPassword(" ");
         dsc.setDbType(DbType.MYSQL);
         mpg.setDataSource(dsc);
 
