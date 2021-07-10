@@ -10,21 +10,21 @@ spring:
   # MySQL数据源
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://121.196.198.1/txiz-seckill?serverTimezone=GMT%2B8
-    username: xiongzhaoxi
-    password: xzx123
+    url:
+    username:
+    password:
   # 格式化时间
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
   # Redis
   redis:
-    host: 121.196.198.1
+    host:
     port: 6379
     database: 0
   # RabbitMq
   rabbitmq:
-    host: 121.196.198.1
+    host:
     port: 5672
 
 # mybatis-plus日志
