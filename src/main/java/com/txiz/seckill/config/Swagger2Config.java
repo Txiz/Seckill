@@ -1,5 +1,6 @@
 package com.txiz.seckill.config;
 
+import io.swagger.annotations.ApiOperation;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -26,7 +27,7 @@ public class Swagger2Config {
                 .groupName("webApi")
                 .apiInfo(webApiInfo())
                 .select()
-                .apis(RequestHandlerSelectors.any())
+                .apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
                 .paths((PathSelectors.regex("/error.*").negate()))
                 .paths(PathSelectors.any())
                 .build();

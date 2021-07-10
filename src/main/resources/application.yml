@@ -22,6 +22,10 @@ spring:
     host: 121.196.198.1
     port: 6379
     database: 0
+  # RabbitMq
+  rabbitmq:
+    host: 121.196.198.1
+    port: 5672
 
 # mybatis-plus日志
 mybatis-plus:

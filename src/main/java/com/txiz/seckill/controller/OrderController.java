@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.RateLimiter;
 import com.txiz.seckill.service.OrderService;
 import com.txiz.seckill.service.StockService;
 import com.txiz.seckill.service.UserService;
+import com.txiz.seckill.util.RabbitUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.redisson.api.RLock;
@@ -140,23 +141,64 @@ public class OrderController {
     @Resource
     private RedissonClient redissonClient;
 
+    private final String CREATE_ORDER_LOCK = "create_order_lock";
+
     @GetMapping("/createOrderWithVerifyHashAndLimitByRedisLock")
     @ApiOperation(value = "Redisson分布式锁")
     public String createOrderWithVerifyHashAndLimitByRedisLock(@RequestParam Integer sid, @RequestParam Integer uid, @RequestParam String verifyHash) {
-        String key = "create_order_lock";
-        RLock lock = redissonClient.getLock(key);
-        lock.lock();
+        RLock lock = redissonClient.getLock(CREATE_ORDER_LOCK);
         try {
-            int count = userService.addUserCount(uid);
-            LOGGER.info("用户截至该次的访问次数为: {}", count);
+            lock.lock();
             boolean checkUserCount = userService.checkUserCount(uid);
             if (checkUserCount) {
                 LOGGER.error("购买失败，超过频率限制！");
                 return "购买失败，超过频率限制！";
             }
             int remain = orderService.createOrderWithVerifyHash(sid, uid, verifyHash);
+            int count = userService.addUserCount(uid);
+            LOGGER.info("用户截至该次的访问次数为: {}", count);
             LOGGER.info("购买成功，剩余库存为: {}", remain);
             return "购买成功，剩余库存为：" + remain;
+        } catch (Exception e) {
+            LOGGER.error("购买失败：{}", e.getMessage());
+            return "购买失败：" + e.getMessage();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Resource
+    private RabbitUtil rabbitUtil;
+
+    @GetMapping("/createOrder")
+    @ApiOperation(value = "比较完全的秒杀")
+    public String createOrder(@RequestParam Integer sid, @RequestParam Integer uid, @RequestParam String verifyHash) {
+        // 可以提前进行一些验证，比如接口hash值是否匹配，比如是否有库存。
+        boolean checkUserCount = userService.checkUserCount(uid);
+        if (checkUserCount) {
+            LOGGER.error("购买失败（未加锁），超过频率限制！");
+            return "购买失败，超过频率限制！";
+        }
+        RLock lock = redissonClient.getLock(CREATE_ORDER_LOCK);
+        try {
+            lock.lock();
+            checkUserCount = userService.checkUserCount(uid);
+            if (checkUserCount) {
+                LOGGER.error("购买失败（已加锁），超过频率限制！");
+                return "购买失败，超过频率限制！";
+            }
+            // 在上架秒杀活动的时候，就进行初始的缓存，保证这里stockCount存在。
+            Integer stockCount = stockService.getStockFromRedis(sid);
+            if (stockCount == null || stockCount == 0) {
+                LOGGER.error("库存不足，秒杀请求失败");
+                return "库存不足，秒杀请求失败";
+            }
+            int count = userService.addUserCount(uid);
+            LOGGER.info("用户截至该次的访问次数为: {}", count);
+            stockService.setStockToRedis(sid, stockCount - 1);
+            // 通知消息队列，生成订单
+            rabbitUtil.sendMessage("ORDER_EXCHANGE", "ORDER_KEY", sid);
+            return "购买成功！";
         } catch (Exception e) {
             LOGGER.error("购买失败：{}", e.getMessage());
             return "购买失败：" + e.getMessage();

@@ -67,11 +67,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Integer value = (Integer) redisTemplate.opsForValue().get(key);
         // 如果key不存在，证明无记录
         if (value == null) {
-            LOGGER.error("该用户疑似没有访问记录");
-            return true;
+            return false;
         }
         // 设置允许值，假设1分钟只允许10次
         int ALLOW_COUNT = 10;
-        return value > ALLOW_COUNT;
+        return value >= ALLOW_COUNT;
     }
 }
